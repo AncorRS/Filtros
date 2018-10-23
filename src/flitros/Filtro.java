@@ -1,41 +1,59 @@
 package flitros;
 
 import java.io.IOException;
+import java.util.HashMap;
+ 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+@WebFilter(filterName="/FiltroEstadistica",urlPatterns="/*" )
+public class Filtro implements Filter {
+ 
+ public void destroy() {
+ // TODO Auto-generated method stub
+ }
+ @SuppressWarnings("unchecked")
+ public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+ // TODO Auto-generated method stub
+ // place your code here
+ 
+HttpServletRequest peticion= (HttpServletRequest)request;
+ ServletContext contexto= request.getServletContext();
+ 
+ HashMap<String, Integer> urls;
+ if (contexto.getAttribute("estadistica")==null) {
+ //creamos un objeto en el contexto
+ urls= new HashMap<String,Integer>();
+ 
+ urls.put(peticion.getRequestURL().toString(), 1);
+ contexto.setAttribute("estadistica", urls);
+ }else {
+ 
+ // actualizamos claves e incrementamos
+ urls=(HashMap<String,Integer>)contexto.getAttribute("estadistica");
+ 
+ if (urls.get(peticion.getRequestURL().toString())==null) {
+ 
+ urls.put(peticion.getRequestURL().toString(), 1);
+ }else {
+ urls.put(peticion.getRequestURL().toString(), urls.get(peticion.getRequestURL().toString())+1);
+ }
+ }
+ 
+ chain.doFilter(request, response);
+ }
+ 
 /**
- * Servlet implementation class Filtro
+ * @see Filter#init(FilterConfig)
  */
-@WebServlet("/Filtro")
-public class Filtro extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Filtro() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-
+ public void init(FilterConfig fConfig) throws ServletException {
+ // TODO Auto-generated method stub
+ }
+ 
 }
